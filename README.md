@@ -11,6 +11,11 @@ look: it keeps showing the version it opened. This viewer watches the file,
 redraws within about a second of each save, and stays on the slide you were
 looking at.
 
+> Development happens in a private Azure DevOps repository; this GitHub
+> repository is a published mirror, updated when there is something worth
+> publishing. Issues and discussion here are read — pull requests are applied
+> by hand upstream, so please open an issue first for anything substantial.
+
 ## Features
 
 - Reloads on every save, whether the file is overwritten in place or replaced
@@ -47,10 +52,13 @@ Requires macOS 14 or later. Apple Silicon and Intel.
 
 ## Install
 
-Build it (below) and move `Proofdeck.app` to `~/Applications` — the
-build script does that for you. The build is ad-hoc signed and not notarized,
-so macOS may block the first launch of a copy you received from someone else;
-allow it under **System Settings → Privacy & Security**.
+Download the zip from [Releases](../../releases), unpack it, and move
+`Proofdeck.app` to `~/Applications` — or build it yourself (below).
+
+The release build is ad-hoc signed and not notarized, so macOS blocks the
+first launch. To allow it, open **System Settings → Privacy & Security**,
+scroll down to Security, and press **Open Anyway** next to the message about
+Proofdeck.
 
 Open a deck with **File → Open…**, from the Finder's *Open With* menu, or
 
@@ -100,8 +108,10 @@ The server talks to the running app over a Unix socket in
 open, and starts the app in the background if it is not running. Nothing
 listens on the network.
 
-Because the build is ad-hoc signed, macOS treats every new build as a new
-app and asks again for access to protected folders such as the Desktop.
+An ad-hoc signature changes with every build, so after updating a release
+macOS treats it as a new app and asks again for access to protected folders
+such as the Desktop. A build of your own signed with an Apple Development
+identity (below) keeps those grants.
 
 ## Build
 
@@ -114,6 +124,13 @@ bundles the page with esbuild, generates the Xcode project from `project.yml`
 with XcodeGen, builds the app and its Quick Look extension, copies
 `Proofdeck.app` to `~/Applications` and registers the extension.
 Requires Xcode, Node.js and `brew install xcodegen`.
+
+Signing uses whichever Apple Development identity is in your keychain
+(override with `DEVELOPMENT_TEAM=…`); with no identity at all the build is
+signed ad-hoc. `Proofdeck.xcodeproj` is generated from `project.yml` and is
+not committed — run `scripts/bootstrap.sh` after adding a source file, and
+`scripts/ci.sh` for the same checks CI runs. [SPEC.md](SPEC.md) covers the
+architecture (in Japanese).
 
 `swift build` still works for quick debug runs of the app alone.
 

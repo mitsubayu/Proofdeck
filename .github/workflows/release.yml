@@ -1,0 +1,68 @@
+# Publishes a Release build when a v* tag is pushed:
+#
+#   scripts/mirror-to-github.sh v0.3.0
+#
+# The zip is ad-hoc signed, not notarized — signing for real needs a Developer
+# ID certificate from the Apple Developer Program. Ad-hoc is not a nicety: an
+# arm64 binary with no signature at all will not launch, and Quick Look only
+# loads a preview extension that is signed with its sandbox entitlement. So
+# the build is signed by xcodebuild itself ("-"), not left unsigned and
+# re-signed afterwards, which would drop the extension's entitlements.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build and check
+        run: |
+          scripts/ci.sh \
+            CODE_SIGN_IDENTITY=- \
+            DEVELOPMENT_TEAM= \
+            MARKETING_VERSION="${GITHUB_REF_NAME#v}"
+
+      - name: Package
+        run: |
+          APP=.build/xcode/Build/Products/Release/Proofdeck.app
+          codesign --verify --deep --strict --verbose "$APP"
+          # ditto, not zip: it is the only archiver that preserves the bundle's
+          # symlinks and extended attributes intact.
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "Proofdeck-${GITHUB_REF_NAME}.zip"
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "Proofdeck-${GITHUB_REF_NAME}.zip" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file - <<'NOTES'
+          Unpack the zip and move `Proofdeck.app` to `~/Applications` (or `/Applications`).
+
+          The build is ad-hoc signed and not notarized, so the first launch is
+          blocked: open **System Settings → Privacy & Security**, scroll to
+          Security and press **Open Anyway**.
+
+          To let Claude Code use the viewer, choose **Proofdeck → Claude Code と連携する…**
+          from the app menu, or register the bundled MCP server by hand:
+
+              claude mcp add proofdeck --scope user -- ~/Applications/Proofdeck.app/Contents/MacOS/proofdeck-mcp
+
+          An ad-hoc signature changes with every build, so after an update
+          macOS asks again for access to folders such as the Desktop.
+          NOTES

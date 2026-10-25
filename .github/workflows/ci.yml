@@ -1,0 +1,32 @@
+# Build on every push and pull request. The runner has no signing certificate,
+# so scripts/bootstrap.sh falls back to an ad-hoc signature.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build and check
+        run: scripts/ci.sh
+
+      - name: Keep the build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: .build/reports

@@ -11,10 +11,11 @@ settings:
     MARKETING_VERSION: "0.2.0"
     CURRENT_PROJECT_VERSION: "1"
     OTHER_SWIFT_FLAGS: "-enable-bare-slash-regex"
-    # 個人の Apple Developer ID を手に入れるまでは ad-hoc 署名
+    # scripts/bootstrap.sh が、キーチェーンにある Apple Development の証明書から埋める。
+    # 証明書が無ければ ad-hoc（"-"）。作者のチームをここに書くと、他の人のビルドが通らなくなる
     CODE_SIGN_STYLE: Manual
-    CODE_SIGN_IDENTITY: "-"
-    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_IDENTITY: ${CODE_SIGN_IDENTITY}
+    DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
     ENABLE_HARDENED_RUNTIME: NO
 targets:
   Proofdeck:
