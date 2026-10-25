@@ -1,0 +1,15 @@
+{
+  "name": "proofdeck-web",
+  "private": true,
+  "description": "WKWebView 内で pptx を描くためのページ。pptx-vanilla-viewer を描画だけに使う。",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "pptx-vanilla-viewer": "3.50.1",
+    "ooxml-ui": "1.26.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10"
+  }
+}

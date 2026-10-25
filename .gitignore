@@ -1,0 +1,8 @@
+.build/
+*.app
+web/node_modules/
+Resources/web/
+.DS_Store
+Proofdeck.xcodeproj/
+web/meta.json
+comparison/
