@@ -10,7 +10,7 @@ set -eu
 cd "$(dirname "$0")"
 scripts/bootstrap.sh >/dev/null
 xcodebuild -project Proofdeck.xcodeproj -scheme Proofdeck -configuration Release \
-  -derivedDataPath .build/xcode build 2>&1 | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
+  -destination "generic/platform=macOS" -derivedDataPath .build/xcode build 2>&1 | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
 APP=.build/xcode/Build/Products/Release/Proofdeck.app
 [ -d "$APP/Contents/PlugIns/ProofdeckPreview.appex" ] || { echo "build failed"; exit 1; }
 echo "built: $(pwd)/$APP"

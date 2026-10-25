@@ -18,6 +18,7 @@ xcodebuild \
     -project Proofdeck.xcodeproj \
     -scheme Proofdeck \
     -configuration Release \
+    -destination "generic/platform=macOS" \
     -derivedDataPath "$DERIVED_DATA" \
     "$@" \
     build >"$LOG/build.log" 2>&1 || {
@@ -32,6 +33,12 @@ for f in Contents/MacOS/Proofdeck Contents/MacOS/proofdeck-mcp \
          Contents/PlugIns/ProofdeckPreview.appex Contents/Resources/web/index.html \
          Contents/Resources/AppIcon.icns; do
     [[ -e "$APP/$f" ]] || { echo "✘ missing $f"; exit 1; }
+done
+# Without a generic destination xcodebuild builds only for this Mac's
+# architecture, and the release would quietly stop running on Intel.
+for bin in Contents/MacOS/Proofdeck Contents/MacOS/proofdeck-mcp \
+           Contents/PlugIns/ProofdeckPreview.appex/Contents/MacOS/ProofdeckPreview; do
+    lipo "$APP/$bin" -verify_arch arm64 x86_64 || { echo "✘ $bin is not universal"; exit 1; }
 done
 # Quick Look only loads a sandboxed extension, so losing the entitlement in a
 # signing change would silently turn the preview off.
