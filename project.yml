@@ -26,6 +26,9 @@ targets:
       - path: Resources/web
         type: folder
         buildPhase: resources
+      # 原画は Resources/AppIcon.svg。直したら swift scripts/make-icon.swift で作り直す
+      - path: Resources/AppIcon.icns
+        buildPhase: resources
     # Info.plist と権限の設定ファイルは、ここに書いた内容から xcodegen が作る（直接書き換えても上書きされる）
     info:
       path: Resources/Info.plist

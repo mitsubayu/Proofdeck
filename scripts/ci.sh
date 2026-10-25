@@ -29,7 +29,8 @@ xcodebuild \
 APP="$DERIVED_DATA/Build/Products/Release/Proofdeck.app"
 echo "▸ Checking the bundle"
 for f in Contents/MacOS/Proofdeck Contents/MacOS/proofdeck-mcp \
-         Contents/PlugIns/ProofdeckPreview.appex Contents/Resources/web/index.html; do
+         Contents/PlugIns/ProofdeckPreview.appex Contents/Resources/web/index.html \
+         Contents/Resources/AppIcon.icns; do
     [[ -e "$APP/$f" ]] || { echo "✘ missing $f"; exit 1; }
 done
 # Quick Look only loads a sandboxed extension, so losing the entitlement in a
