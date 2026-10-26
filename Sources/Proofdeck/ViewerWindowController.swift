@@ -460,7 +460,7 @@ final class ViewerWindowController: NSWindowController, NSWindowDelegate, NSSpli
             }
             // 大きさを変えた直後は描き直しを待つ
             try? await Task.sleep(nanoseconds: 150_000_000)
-            await self.thumbWeb.goTo(index)
+            await self.thumbWeb.goTo(index, forSnapshot: true)
             guard gen == self.displayedGeneration, let image = await self.thumbWeb.snapshotWhole(pixelWidth: w * 2),
                   let tiff = image.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff),
                   let png = rep.representation(using: .png, properties: [:]) else {
@@ -496,7 +496,7 @@ final class ViewerWindowController: NSWindowController, NSWindowDelegate, NSSpli
             if i < deck.hidden.count, deck.hidden[i] { skipped += 1; continue }
             setStatus("\(label)… \(i + 1) / \(slideCount)")
             let t0 = Date()
-            await thumbWeb.goTo(i)
+            await thumbWeb.goTo(i, forSnapshot: true)
             let t1 = Date()
             guard let img = await thumbWeb.snapshotWhole(pixelWidth: pixelWidth),
                   let cg = img.cgImage(forProposedRect: nil, context: nil, hints: nil) else { continue }
@@ -1007,7 +1007,7 @@ final class ViewerWindowController: NSWindowController, NSWindowDelegate, NSSpli
                 await self.runPriorityJobs()
                 guard gen == self.displayedGeneration else { await self.runPriorityJobs(); return }
                 if !force && self.slideList.hasThumbnail(i) { continue }
-                await self.thumbWeb.goTo(i)
+                await self.thumbWeb.goTo(i, forSnapshot: true)
                 guard gen == self.displayedGeneration, let img = await self.thumbWeb.snapshotWhole(pixelWidth: pixelWidth),
                       let compact = Self.compactImage(img) else { continue }
                 self.slideList.setThumbnail(compact, at: i)
@@ -1209,7 +1209,7 @@ final class ViewerWindowController: NSWindowController, NSWindowDelegate, NSSpli
                     self.releaseThumbWebIfIdle()
                 }
                 try? await Task.sleep(nanoseconds: 150_000_000)
-                await self.thumbWeb.goTo(index)
+                await self.thumbWeb.goTo(index, forSnapshot: true)
                 guard let img = await self.thumbWeb.snapshotWhole(pixelWidth: pixelWidth),
                       let tiff = img.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff),
                       let data = rep.representation(using: jpeg ? .jpeg : .png, properties: jpeg ? [.compressionFactor: 0.88] : [:]) else {

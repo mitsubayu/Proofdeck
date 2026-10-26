@@ -159,9 +159,12 @@ final class WebSlideView: NSView, WKScriptMessageHandler, WKNavigationDelegate {
         }
     }
 
-    func goTo(_ index: Int) async {
+    /// forSnapshot: 撮るためだけに移るときは、描画の合図（2 フレーム）を待たない。
+    /// 裏の表示は画面に出ていないので合図が来にくく、待つと 1 枚ごとに上限の 150ms を使ってしまう。
+    /// 撮影（takeSnapshot）は自分で描画の更新を待つので、待たなくても撮れる絵は同じ
+    func goTo(_ index: Int, forSnapshot: Bool = false) async {
         await waitReady()
-        _ = try? await webView.callAsyncJavaScript("await window.ppv.goTo(i)", arguments: ["i": index], contentWorld: .page)
+        _ = try? await webView.callAsyncJavaScript("await window.ppv.goTo(i, f)", arguments: ["i": index, "f": !forSnapshot], contentWorld: .page)
     }
 
     /// 表示中のスライドだけを切り出した画像（比較用）

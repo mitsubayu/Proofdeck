@@ -42,13 +42,15 @@ function makeHost() {
   return host;
 }
 
-/** 描画が落ち着くまで待つ（フォントと画像の読み込み、2 フレーム） */
-async function settle(host) {
+/** 描画が落ち着くまで待つ（フォントと画像の読み込み、2 フレーム）。
+ *  frames: false なら 2 フレームは待たない。撮影（takeSnapshot）は自分で描画の更新を待つので、撮るだけなら要らない */
+async function settle(host, frames = true) {
   await document.fonts.ready;
   const imgs = [...host.querySelectorAll('img')];
   await Promise.all(imgs.map((im) => (im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; setTimeout(r, 3000); }))));
   // 描画の合図（2 フレーム）を待つ。表示が止まっていて合図が来ないときのために、上限を置く
   // 画面が消えているときは合図が来ない。撮影（takeSnapshot）は自分で描画の完了を待つので、ここは短く切り上げてよい
+  if (!frames) return;
   await new Promise((r) => { const t = setTimeout(r, 150); requestAnimationFrame(() => requestAnimationFrame(() => { clearTimeout(t); r(); })); });
 }
 
@@ -110,11 +112,11 @@ window.ppv = {
     return count;
   },
 
-  async goTo(index) {
+  async goTo(index, frames = true) {
     wanted = Math.max(0, index | 0);
     if (!current) return;
     current.viewer.goToSlide(index);
-    await settle(current.host);
+    await settle(current.host, frames);
     post({ type: 'shown', index });
   },
 
