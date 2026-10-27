@@ -6,7 +6,7 @@ import Foundation
 let socketPath = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
     .appendingPathComponent("Proofdeck/control.sock").path
 let bundleID = "com.mitsuba.proofdeck"
-let serverVersion = "0.2.1"
+let serverVersion = "0.2.2"
 
 // MARK: - ビューアとの話
 
